@@ -43,6 +43,11 @@ int diskIsClean = 1;
 
 static int fds_invalid = 0;
 
+/*
+return 1 on t1>t2
+-1 on t1<t2
+0 if equal
+*/
 static inline int
 timeval_cmp(struct timeval *t1, struct timeval *t2)
 {
@@ -489,6 +494,8 @@ runTimeEventQueue()
             timeEventQueue->previous = NULL;
         else
             timeEventQueueLast = NULL;
+
+		puts("running event hdl");
         done = event->handler(event);
         assert(done);
         free(event);
@@ -646,11 +653,15 @@ eventLoop()
             exitFlag = 0;
         }
 
+		//set sleep_time to timeEventQueue->time
         timeToSleep(&sleep_time);
+
+		//若timeEventQueue为空
         if(sleep_time.tv_sec == -1) {
             rc = poll(poll_fds, fdEventNum, 
                       diskIsClean ? -1 : idleTime * 1000);
         } else if(timeval_cmp(&sleep_time, &current_time) <= 0) {
+		  //sleep_time <=current_time
             runTimeEventQueue();
             continue;
         } else {
@@ -662,6 +673,8 @@ eventLoop()
                 int t;
                 timeval_minus(&timeout, &sleep_time, &current_time);
                 t = timeout.tv_sec * 1000 + (timeout.tv_usec + 999) / 1000;
+
+				printf("blocking here\n");
                 rc = poll(poll_fds, fdEventNum,
                           diskIsClean ? t : MIN(idleTime * 1000, t));
             }
@@ -677,6 +690,7 @@ eventLoop()
                 do_log(L_ERROR, 
                        "Couldn't poll: out of memory.  "
                        "Sleeping for one second.\n");
+				printf("sleep\n");
                 sleep(1);
             } else {
                 do_log_error(L_ERROR, errno, "Couldn't poll");
