@@ -63,6 +63,9 @@ timeval_cmp(struct timeval *t1, struct timeval *t2)
         return 0;
 }
 
+/**
+d = s1 - s2;
+*/
 static inline void
 timeval_minus(struct timeval *d,
               const struct timeval *s1, const struct timeval *s2)
@@ -200,13 +203,18 @@ interestingSignals(sigset_t *ss)
 }
 #endif
 
+/**
+set both tv_sec and tv_usec to -1
+*/
 void
 timeToSleep(struct timeval *time)
 {
     if(!timeEventQueue) {
+	  // not sleeping
         time->tv_sec = ~0L;
         time->tv_usec = ~0L;
     } else {
+	  // sleeping
         *time = timeEventQueue->time;
     }
 }
@@ -495,7 +503,7 @@ runTimeEventQueue()
         else
             timeEventQueueLast = NULL;
 
-		puts("running event hdl");
+		puts("running event handler");
         done = event->handler(event);
         assert(done);
         free(event);
@@ -636,6 +644,9 @@ eventLoop()
 
     gettimeofday(&current_time, NULL);
 
+	/**
+	   Scheduling delayed events here.
+	*/
     while(1) {
     again:
         if(exitFlag) {
@@ -656,15 +667,18 @@ eventLoop()
 		//set sleep_time to timeEventQueue->time
         timeToSleep(&sleep_time);
 
-		//若timeEventQueue为空
+
         if(sleep_time.tv_sec == -1) {
+		  //if timeEventQueue has no item
             rc = poll(poll_fds, fdEventNum, 
                       diskIsClean ? -1 : idleTime * 1000);
         } else if(timeval_cmp(&sleep_time, &current_time) <= 0) {
-		  //sleep_time <=current_time
+		  //sleep_time <= current_time
+		  //slept and start to run event queue
             runTimeEventQueue();
             continue;
         } else {
+		  //timeEventQueue has items and sleeping isn't over
             gettimeofday(&current_time, NULL);
             if(timeval_cmp(&sleep_time, &current_time) <= 0) {
                 runTimeEventQueue();
@@ -674,6 +688,7 @@ eventLoop()
                 timeval_minus(&timeout, &sleep_time, &current_time);
                 t = timeout.tv_sec * 1000 + (timeout.tv_usec + 999) / 1000;
 
+				// we are blocking here when no activities
 				printf("blocking here\n");
                 rc = poll(poll_fds, fdEventNum,
                           diskIsClean ? t : MIN(idleTime * 1000, t));
@@ -682,6 +697,7 @@ eventLoop()
 
         gettimeofday(&current_time, NULL);
 
+		// rc == -1 if an error occurred when polling
         if(rc < 0) {
             if(errno == EINTR) {
                 continue;
@@ -699,6 +715,7 @@ eventLoop()
             continue;
         }
 
+		// polling timeout
         if(rc == 0) {
             if(!diskIsClean) {
                 timeToSleep(&sleep_time);
@@ -712,6 +729,7 @@ eventLoop()
            assume that something changed whenever we see any activity. */
         diskIsClean = 0;
 
+		// rc > 0, which means we have new activies to take care of
         fd0 = 
             (current_time.tv_usec ^ (current_time.tv_usec >> 16)) % fdEventNum;
         n = rc;
@@ -719,6 +737,7 @@ eventLoop()
             int j = (i + fd0) % fdEventNum;
             if(n <= 0)
                 break;
+
             if(poll_fds[j].revents) {
                 n--;
                 event = findEvent(poll_fds[j].revents, fdEvents[j]);

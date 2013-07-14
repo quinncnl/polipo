@@ -444,6 +444,15 @@ serverSocket(int af)
     return fd;
 }
 
+/*
+#0  do_connect (addr=0x1001075e0, index=0, port=80, handler=0x100016d7e <httpServerConnectionHandler>, data=0x100106d70) at io.c:459
+#1  0x0000000100016d6a in httpServerConnectionDnsHandler (status=<value temporarily unavailable, due to optimizations>, request=<value temporarily unavailable, due to optimizations>) at server.c:580
+#2  0x0000000100021e08 in dnsDelayedDoneNotifyHandler (event=<value temporarily unavailable, due to optimizations>) at dns.c:414
+#3  0x0000000100002745 in runTimeEventQueue () at event.c:507
+#4  0x0000000100002988 in eventLoop () at event.c:675
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 FdEventHandlerPtr
 do_connect(AtomPtr addr, int index, int port,
            int (*handler)(int, FdEventHandlerPtr, ConnectRequestPtr),
@@ -481,6 +490,14 @@ do_connect(AtomPtr addr, int index, int port,
             }
         }
         do_log_error(L_ERROR, errno, "Couldn't create socket");
+
+		/*
+		  Execute httpServerConnectionHandler(int status,
+		  FdEventHandlerPtr event,
+		  ConnectRequestPtr request)
+		  in server.c
+		*/
+
         done = (*handler)(-errno, NULL, &request);
         assert(done);
         return NULL;
@@ -679,6 +696,10 @@ do_scheduled_accept(int status, FdEventHandlerPtr event)
         done = request->handler(-errno, event, request);
     return done;
 }
+
+/**
+The service listner. Invoked from main.c
+*/
 
 FdEventHandlerPtr
 create_listener(char *address, int port,

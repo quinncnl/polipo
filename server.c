@@ -1860,6 +1860,14 @@ httpServerReplyHandler(int status,
     return 0;
 }
 
+/*
+#0  httpServerHandlerHeaders (eof=0, event=0x12b, srequest=0x594, connection=0x100107050) at server.c:1870
+#1  0x0000000100018189 in httpServerReplyHandler (status=0, event=0x12b, srequest=<value temporarily unavailable, due to optimizations>) at server.c:1816
+#2  0x000000010000351a in do_scheduled_stream (status=<value temporarily unavailable, due to optimizations>, event=0x1001073d0) at io.c:240
+#3  0x0000000100002caf in eventLoop () at event.c:746
+#4  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 int
 httpServerHandlerHeaders(int eof,
                          FdEventHandlerPtr event,

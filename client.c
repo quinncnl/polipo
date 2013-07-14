@@ -40,6 +40,13 @@ httpAcceptAgain(TimeEventHandlerPtr event)
     return 1;
 }
 
+/*
+#0  httpAccept (fd=4, event=0x1001053e0, request=0x100105400) at client.c:50
+#1  0x00000001000041c9 in do_scheduled_accept (status=<value temporarily unavailable, due to optimizations>, event=<value temporarily unavailable, due to optimizations>) at io.c:679
+#2  0x0000000100002caf in eventLoop () at event.c:743
+#3  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 int
 httpAccept(int fd, FdEventHandlerPtr event, AcceptRequestPtr request)
 {

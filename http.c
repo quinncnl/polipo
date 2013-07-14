@@ -288,6 +288,14 @@ httpTimeoutHandler(TimeEventHandlerPtr event)
     return 1;
 }
 
+/*
+#0  httpWriteObjectHeaders (buf=0x100200000 "HTTP/1.1 200 OK", offset=15, len=8192, object=0x100106d60, from=0, to=-1) at http.c:298
+#1  0x00000001000144f1 in httpServeObject (connection=0x100106ac0) at client.c:1712
+#2  0x0000000100014c8d in httpServeObjectDelayed (event=<value temporarily unavailable, due to optimizations>) at client.c:1824
+#3  0x0000000100002745 in runTimeEventQueue () at event.c:507
+#4  0x0000000100002988 in eventLoop () at event.c:675
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
 int
 httpWriteObjectHeaders(char *buf, int offset, int len,
                        ObjectPtr object, int from, int to)
@@ -557,6 +565,14 @@ htmlPrint(FILE *out, char *s, int slen)
     }
 }
 
+/*
+#0  httpMakeConnection () at http.c:572
+#1  0x0000000100011efd in httpAccept (fd=4, event=0x6, request=<value temporarily unavailable, due to optimizations>) at client.c:95
+#2  0x00000001000041c9 in do_scheduled_accept (status=<value temporarily unavailable, due to optimizations>, event=<value temporarily unavailable, due to optimizations>) at io.c:679
+#3  0x0000000100002caf in eventLoop () at event.c:743
+#4  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 HTTPConnectionPtr
 httpMakeConnection()
 {
@@ -628,6 +644,15 @@ httpConnectionDestroyReqbuf(HTTPConnectionPtr connection)
     connection->flags &= ~CONN_BIGREQBUF;
     connection->reqbuf = NULL;
 }
+
+/*
+#0  httpMakeRequest () at http.c:650
+#1  0x0000000100012ca7 in httpClientHandlerHeaders (event=0xfffffc00, srequest=0x100100000, connection=0x100106ac0) at client.c:648
+#2  0x00000001000120dd in httpClientHandler (status=<value temporarily unavailable, due to optimizations>, event=0x100100000, request=<value temporarily unavailable, due to optimizations>) at client.c:392
+#3  0x000000010000351a in do_scheduled_stream (status=<value temporarily unavailable, due to optimizations>, event=0x100106b80) at io.c:240
+#4  0x0000000100002caf in eventLoop () at event.c:743
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
 
 HTTPRequestPtr 
 httpMakeRequest()
@@ -808,7 +833,16 @@ httpDestroyCondition(HTTPConditionPtr condition)
         free(condition->ifrange);
     free(condition);
 }
-        
+      
+/*
+#0  httpCondition (object=0x100106d60, condition=0x0) at http.c:842
+#1  0x00000001000141f4 in httpServeObject (connection=0x100106ac0) at client.c:1613
+#2  0x0000000100014c8d in httpServeObjectDelayed (event=<value temporarily unavailable, due to optimizations>) at client.c:1824
+#3  0x0000000100002745 in runTimeEventQueue () at event.c:507
+#4  0x0000000100002988 in eventLoop () at event.c:675
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+  
 int
 httpCondition(ObjectPtr object, HTTPConditionPtr condition)
 {
@@ -850,6 +884,16 @@ httpCondition(ObjectPtr object, HTTPConditionPtr condition)
 
     return rc;
 }
+
+/*
+#0  httpWriteErrorHeaders (buf=0x100200000 "GET / HTTP/1.1\r\nHost: www.epochtimes.com\r\nAccept-Encoding: identity\r\nAccept: \r\nAccept-Encoding: gzip, deflate, compress\r\nAccept: *\r\nUser-Agent: python-requests/1.2.0 CPython/3.3.1 Darwin/12.4.0\r\n"..., size=8192, offset=0, do_body=1, code=502, message=0x100107b60, headers=<value temporarily unavailable, due to optimizations>, url_len=26, etag=<value temporarily unavailable, due to optimizations>) at http.c:900
+#1  0x0000000100012f4b in httpClientRawErrorHeaders (connection=0x100106ac0, code=502, message=0x100107b60, close=<value temporarily unavailable, due to optimizations>, headers=0x0) at client.c:462
+#2  0x000000010001496a in httpServeObject (connection=<value temporarily unavailable, due to optimizations>) at client.c:488
+#3  0x0000000100014c8d in httpServeObjectDelayed (event=<value temporarily unavailable, due to optimizations>) at client.c:1824
+#4  0x0000000100002745 in runTimeEventQueue () at event.c:507
+#5  0x0000000100002988 in eventLoop () at event.c:675
+#6  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165															   
+*/
 
 int
 httpWriteErrorHeaders(char *buf, int size, int offset, int do_body,
