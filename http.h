@@ -56,6 +56,9 @@ typedef struct _HTTPRequest {
 #define REQUEST_FORCE_ERROR 8
 #define REQUEST_PIPELINED 16
 
+/**
+Connection to server, pipelined requests in a queue.
+*/
 typedef struct _HTTPConnection {
     int flags;
     int fd;

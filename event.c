@@ -262,6 +262,10 @@ enqueueTimeEvent(TimeEventHandlerPtr event)
     return event;
 }
 
+/**
+Schedule any event from here
+*/
+
 TimeEventHandlerPtr
 scheduleTimeEvent(int seconds,
                   int (*handler)(TimeEventHandlerPtr), int dsize, void *data)
@@ -420,6 +424,10 @@ registerFdEventHelper(FdEventHandlerPtr event)
 
     return event;
 }
+
+/**
+Register a poll event.
+*/
 
 FdEventHandlerPtr 
 registerFdEvent(int fd, int poll_events, 
@@ -645,7 +653,7 @@ eventLoop()
     gettimeofday(&current_time, NULL);
 
 	/**
-	   Scheduling delayed events here.
+	   Scheduling events here.
 	*/
     while(1) {
     again:
@@ -669,26 +677,29 @@ eventLoop()
 
 
         if(sleep_time.tv_sec == -1) {
-		  //if timeEventQueue has no item
+		  //if timeEventQueue has no items, poll for non-time events
             rc = poll(poll_fds, fdEventNum, 
                       diskIsClean ? -1 : idleTime * 1000);
         } else if(timeval_cmp(&sleep_time, &current_time) <= 0) {
 		  //sleep_time <= current_time
-		  //slept and start to run event queue
+		  //Timeout and start to run timed out events
             runTimeEventQueue();
             continue;
         } else {
-		  //timeEventQueue has items and sleeping isn't over
+		  //timeEventQueue has items and has not timed out
+		  //refresh current time
             gettimeofday(&current_time, NULL);
             if(timeval_cmp(&sleep_time, &current_time) <= 0) {
+			  //refreshed and find timeout
                 runTimeEventQueue();
                 continue;
             } else {
+			  //still sleeping
                 int t;
                 timeval_minus(&timeout, &sleep_time, &current_time);
                 t = timeout.tv_sec * 1000 + (timeout.tv_usec + 999) / 1000;
 
-				// we are blocking here when no activities
+				//blocking here for requests
 				printf("blocking here\n");
                 rc = poll(poll_fds, fdEventNum,
                           diskIsClean ? t : MIN(idleTime * 1000, t));

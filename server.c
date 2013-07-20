@@ -142,6 +142,10 @@ httpServerIdle(HTTPServerPtr server)
     return 1;
 }
 
+/**
+When a server has sent all response, keep it alive for a while in case another client requests the same server.
+*/
+
 static int
 expireServersHandler(TimeEventHandlerPtr event)
 {

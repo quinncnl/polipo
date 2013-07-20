@@ -396,6 +396,7 @@ httpClientHandler(int status,
 
     if(i >= 0) {
         connection->reqbegin = i;
+		//  header fully loaded
         httpClientHandlerHeaders(event, request, connection);
         return 1;
     }
@@ -709,6 +710,15 @@ delayedHttpClientRequest(HTTPRequestPtr request)
         return -1;
     return 1;
 }
+
+/**
+#0  httpClientRequest (request=0x100106a00, url=0x100106f50) at client.c:725
+#1  0x0000000100012d8c in httpClientHandlerHeaders (event=0x100106a00, srequest=0x100106f50, connection=<value temporarily unavailable, due to optimizations>) at client.c:673
+#2  0x00000001000120dd in httpClientHandler (status=<value temporarily unavailable, due to optimizations>, event=0x100106f50, request=<value temporarily unavailable, due to optimizations>) at client.c:399
+#3  0x000000010000351a in do_scheduled_stream (status=<value temporarily unavailable, due to optimizations>, event=0x100107930) at io.c:240
+#4  0x0000000100002caf in eventLoop () at event.c:757
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
 
 int
 httpClientRequest(HTTPRequestPtr request, AtomPtr url)

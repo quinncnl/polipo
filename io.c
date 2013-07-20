@@ -4,7 +4,7 @@ Copyright (c) 2003-2006 by Juliusz Chroboczek
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+to use, copy, schedule_streammodify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
@@ -71,6 +71,16 @@ do_stream(int operation, int fd, int offset, char *buf, int len,
                            handler, data);
 }
 
+/**
+#0  do_stream_2 (operation=256, fd=6, offset=717, buf=0x100204000 "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtm"..., len=7627, buf2=0x0, len2=0, handler=0x100204000, data=0x0) at io.c:80
+#1  0x0000000100019e5f in httpServerReadData (connection=0x100107620, immediate=7627) at server.c:2583
+#2  0x0000000100019837 in httpServerHandlerHeaders (eof=<value temporarily unavailable, due to optimizations>, event=0x10762000001dcb, srequest=0x2cd, connection=<value temporarily unavailable, due to optimizations>) at server.c:2396
+#3  0x0000000100018189 in httpServerReplyHandler (status=0, event=0x10762000001dcb, srequest=<value temporarily unavailable, due to optimizations>) at server.c:1820
+#4  0x000000010000351a in do_scheduled_stream (status=<value temporarily unavailable, due to optimizations>, event=0x1001076a0) at io.c:240
+#5  0x0000000100002caf in eventLoop () at event.c:757
+#6  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 FdEventHandlerPtr
 do_stream_2(int operation, int fd, int offset, 
             char *buf, int len, char *buf2, int len2,
@@ -82,6 +92,18 @@ do_stream_2(int operation, int fd, int offset,
                            NULL, 0, buf, len, buf2, len2, NULL, 0, NULL,
                            handler, data);
 }
+
+/**
+Stream content to client.
+
+#0  do_stream_3 (operation=256, fd=6, offset=1440, buf=0x100204000 "<!DOCTYPE html><!--STATUS OK--><html><head><meta http-equiv=\"content-type\" content=\"text/html;charse"..., len=8192, buf2=0x100200000 "HTTP/1.1 200 OK\r\nDate: Sat, 20 Jul 2013 12:00:08 GMT\r\nServer: BWS/1.0\r\nContent-Length: 10437\r\nConten"..., len2=2245, buf3=0x10 <Address 0x10 out of bounds>, len3=8192, handler=0x100204000, data=0x100204000) at io.c:102
+#1  0x0000000100019dc2 in httpServerReadData (connection=<value temporarily unavailable, due to optimizations>, immediate=10437) at server.c:2568
+#2  0x0000000100019837 in httpServerHandlerHeaders (eof=<value temporarily unavailable, due to optimizations>, event=0x107840000028c5, srequest=0x5a0, connection=<value temporarily unavailable, due to optimizations>) at server.c:2396
+#3  0x0000000100018189 in httpServerReplyHandler (status=0, event=0x107840000028c5, srequest=<value temporarily unavailable, due to optimizations>) at server.c:1820
+#4  0x000000010000351a in do_scheduled_stream (status=<value temporarily unavailable, due to optimizations>, event=0x100107b30) at io.c:259
+#5  0x0000000100002caf in eventLoop () at event.c:757
+#6  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
 
 FdEventHandlerPtr
 do_stream_3(int operation, int fd, int offset, 
@@ -95,6 +117,17 @@ do_stream_3(int operation, int fd, int offset,
                            handler, data);
 }
 
+/*
+Stream header.
+
+#0  do_stream_h (operation=1, fd=4, offset=0, header=0x100200000 "HTTP/1.1 302 Moved Temporarily\r\nContent-Length: 0\r\nDate: Sat, 20 Jul 2013 11:55:06 GMT\r\nLocation: ht"..., hlen=180, buf=0x0, len=0, handler=0x1002000b0, data=0x100106ca4) at io.c:104
+#1  0x0000000100014920 in httpServeObject (connection=0x100106b50) at client.c:1813
+#2  0x0000000100014c8d in httpServeObjectDelayed (event=<value temporarily unavailable, due to optimizations>) at client.c:1841
+#3  0x0000000100002745 in runTimeEventQueue () at event.c:515
+#4  0x0000000100002988 in eventLoop () at event.c:686
+#5  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
+
 FdEventHandlerPtr
 do_stream_h(int operation, int fd, int offset,
             char *header, int hlen, char *buf, int len,
@@ -106,6 +139,14 @@ do_stream_h(int operation, int fd, int offset,
                            header, hlen, buf, len, NULL, 0, NULL, 0, NULL,
                            handler, data);
 }
+
+/**
+#0  do_stream_buf (operation=256, fd=10, offset=0, buf_location=0x1001075d8, len=8192, handler=0x100011fe7 <httpClientHandler>, data=0x100107590) at io.c:144
+#1  0x0000000100011f7d in httpAccept (fd=<value temporarily unavailable, due to optimizations>, event=0xa, request=<value temporarily unavailable, due to optimizations>) at client.c:120
+#2  0x00000001000041c9 in do_scheduled_accept (status=<value temporarily unavailable, due to optimizations>, event=<value temporarily unavailable, due to optimizations>) at io.c:725
+#3  0x0000000100002caf in eventLoop () at event.c:757
+#4  0x000000010000cff6 in main (argc=<value temporarily unavailable, due to optimizations>, argv=<value temporarily unavailable, due to optimizations>) at main.c:165
+*/
 
 FdEventHandlerPtr
 do_stream_buf(int operation, int fd, int offset, char **buf_location, int len,
@@ -147,6 +188,9 @@ chunkHeader(char *buf, int buflen, int i)
     return n;
 }
 
+/**
+Send stream to server or client.
+*/
 
 FdEventHandlerPtr
 schedule_stream(int operation, int fd, int offset,
@@ -222,6 +266,10 @@ schedule_stream(int operation, int fd, int offset,
 }
 
 static const char *endChunkTrailer = "\r\n0\r\n\r\n";
+
+/**
+Invoke the system call read/write here.
+*/
 
 int
 do_scheduled_stream(int status, FdEventHandlerPtr event)
@@ -348,6 +396,9 @@ do_scheduled_stream(int status, FdEventHandlerPtr event)
 
     assert(i > 0);
 
+	/**
+	   The actual read/write to socket.
+	*/
     if((request->operation & IO_MASK) == IO_WRITE) {
         if(i > 1) 
             rc = WRITEV(request->fd, iov, i);
